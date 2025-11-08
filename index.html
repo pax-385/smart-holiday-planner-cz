@@ -8,10 +8,9 @@
 </head>
 <body>
   <h1>🌍 Smart Holiday Planner</h1>
-  <p>Plan your vacation around public holidays to maximize your free time.</p>
+  <p>Plan your vacation days around public holidays to maximize time off.</p>
 
   <div class="controls">
-    <!-- Country selector with flags -->
     <label for="countrySelect">Select country:</label>
     <select id="countrySelect">
       <option value="CZ">🇨🇿 Czech Republic</option>
@@ -19,17 +18,16 @@
       <option value="FR">🇫🇷 France</option>
       <option value="GB">🇬🇧 United Kingdom</option>
       <option value="US">🇺🇸 United States</option>
+      <option value="IN">🇮🇳 India</option>
     </select>
 
-    <!-- Number of vacation days -->
     <label for="daysInput">Vacation days:</label>
     <input type="number" id="daysInput" min="1" max="30" value="20" />
 
     <button id="planBtn">Plan Vacation</button>
   </div>
 
-  <!-- Calendar container -->
-  <div id="calendar"></div>
+  <div id="calendarContainer"></div>
 
   <script src="script.js"></script>
 </body>
