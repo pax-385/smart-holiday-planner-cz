@@ -155,7 +155,14 @@ async function fetchHolidays() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        holidays = await response.json();
+        const allHolidays = await response.json();
+        
+        // Filter to only include actual public holidays (not observances)
+        holidays = allHolidays.filter(h => {
+            // Include if it's a Public holiday type or if global is true
+            return h.types && h.types.includes('Public') || h.global === true;
+        });
+        
         console.log('Holidays loaded:', holidays);
         renderCalendars();
     } catch (error) {
@@ -400,13 +407,21 @@ function renderCalendars() {
                 dayDiv.classList.add('today');
             }
             
+            // Get holiday name if it's a holiday
+            const holidayName = isHoliday(date) ? getHolidayName(date) : '';
+            
             // Priority: vacation > holiday > weekend
             if (isVacation(date)) {
                 dayDiv.classList.add('vacation');
+                // If it's both vacation and holiday, show the holiday name
+                if (holidayName) {
+                    dayDiv.title = holidayName + ' (Vacation day)';
+                }
             } else if (isHoliday(date)) {
                 dayDiv.classList.add('holiday');
-                const holidayName = getHolidayName(date);
-                dayDiv.title = holidayName;
+                if (holidayName) {
+                    dayDiv.title = holidayName;
+                }
             } else if (isWeekend(date)) {
                 dayDiv.classList.add('weekend');
             }
