@@ -11,7 +11,6 @@ function renderCalendar(year, holidays, vacationDays) {
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
 
-  // For simplicity, we’ll show just one year (12 months)
   const start = new Date(year, 0, 1);
   const end = new Date(year, 11, 31);
 
@@ -61,10 +60,11 @@ function renderCalendar(year, holidays, vacationDays) {
   }
 }
 
-// Auto-load the calendar on page load
+// ✅ Ensure script runs after everything is loaded
 window.addEventListener("DOMContentLoaded", async () => {
+  const input = document.getElementById("daysInput");
   const year = new Date().getFullYear();
-  const defaultDays = parseInt(document.getElementById("daysInput").value);
+  const defaultDays = parseInt(input.getAttribute("value")) || 20; // fallback
   const holidays = await fetchHolidays(year);
   renderCalendar(year, holidays, defaultDays);
 });
