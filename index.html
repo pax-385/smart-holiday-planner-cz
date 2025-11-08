@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Holiday Planner</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Czech Vacation Planner</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌍 Smart Holiday Planner</h1>
-  <p>Plan vacation days around public holidays to maximize time off.</p>
+    <div class="container">
+        <header>
+            <h1>🇨🇿 Czech Vacation Planner 2025</h1>
+            <p>Optimize your vacation days by combining weekends and public holidays!</p>
+        </header>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="vacationDays">Vacation Days:</label>
+                <input type="number" id="vacationDays" value="20" min="1" max="50">
+            </div>
+            <button id="calculateBtn">Calculate Best Dates</button>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color weekend"></div>
+                <span>Weekend</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color holiday"></div>
+                <span>Public Holiday</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color vacation"></div>
+                <span>Proposed Vacation</span>
+            </div>
+        </div>
+        
+        <div id="stats" class="stats" style="display: none;"></div>
+        
+        <div id="calendars" class="calendars">
+            <div class="loading">Loading Czech holidays...</div>
+        </div>
+    </div>
 
-  <div class="controls">
-    <label for="countrySelect">Select country:</label>
-    <select id="countrySelect">
-      <option value="CZ">🇨🇿 Czech Republic</option>
-      <option value="DE">🇩🇪 Germany</option>
-      <option value="FR">🇫🇷 France</option>
-      <option value="GB">🇬🇧 United Kingdom</option>
-      <option value="US">🇺🇸 United States</option>
-      <option value="IN">🇮🇳 India</option>
-    </select>
-
-    <label for="daysInput">Vacation days:</label>
-    <input type="number" id="daysInput" min="1" max="30" value="20" />
-
-    <button id="planBtn">Plan Vacation</button>
-  </div>
-
-  <div id="calendarContainer"></div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
