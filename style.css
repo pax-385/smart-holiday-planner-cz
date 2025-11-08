@@ -82,7 +82,6 @@ button:hover {
   background-color: #ffe2e2;
   color: #c00;
   font-weight: bold;
-  cursor: help;
 }
 
 .vacation {
@@ -92,4 +91,25 @@ button:hover {
 
 .empty {
   background: none;
+}
+
+/* Tooltip */
+.day[data-holiday]::after {
+  content: attr(data-holiday);
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.day[data-holiday]:hover::after {
+  display: block;
 }
