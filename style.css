@@ -51,12 +51,106 @@ label {
     color: #333;
 }
 
-input[type="number"] {
+input[type="number"],
+input[type="text"],
+select {
     padding: 10px 15px;
     border: 2px solid #667eea;
     border-radius: 8px;
     font-size: 16px;
+    background: white;
+}
+
+input[type="number"] {
     width: 80px;
+}
+
+input[type="text"] {
+    min-width: 200px;
+}
+
+select {
+    min-width: 150px;
+    cursor: pointer;
+}
+
+.country-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #667eea;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.country-dropdown.show {
+    display: block;
+}
+
+.country-option {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.country-option:hover {
+    background: #e0e7ff;
+}
+
+.input-group {
+    position: relative;
+}
+
+.stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.stepper-btn {
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s;
+    min-width: 40px;
+}
+
+.stepper-btn:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.stepper-btn:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.stepper-btn:hover {
+    background: #5568d3;
+}
+
+.stepper input[type="number"] {
+    border-radius: 0;
+    text-align: center;
+    width: 80px;
+    border-left: none;
+    border-right: none;
+    -moz-appearance: textfield;
+}
+
+.stepper input[type="number"]::-webkit-outer-spin-button,
+.stepper input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 button {
@@ -171,6 +265,7 @@ button:hover {
 .day.holiday {
     background: #fef3c7;
     font-weight: 700;
+    cursor: help;
 }
 
 .day.vacation {
@@ -206,4 +301,22 @@ button:hover {
     color: #333;
     font-size: 1.1em;
     margin: 5px 0;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e5e7eb;
+    color: #666;
+}
+
+footer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
 }
