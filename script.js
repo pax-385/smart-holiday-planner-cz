@@ -1,12 +1,12 @@
-// Fetch Czech public holidays dynamically
-async function fetchHolidays(year) {
-  const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/CZ`;
+// Fetch public holidays for selected country and year
+async function fetchHolidays(countryCode, year) {
+  const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`;
   const response = await fetch(url);
   const data = await response.json();
   return data.map(h => h.date); // returns array of YYYY-MM-DD strings
 }
 
-// Generate a calendar for a given year
+// Generate a simple year calendar
 function renderCalendar(year, holidays, vacationDays) {
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
@@ -34,7 +34,7 @@ function renderCalendar(year, holidays, vacationDays) {
       dayDiv.title = "Public holiday";
     }
 
-    // Placeholder vacation logic
+    // Simple vacation marking example
     if (vacationDays > 0 && holidays.includes(isoDate)) {
       let tempDate = new Date(date);
       let used = 0;
@@ -60,19 +60,27 @@ function renderCalendar(year, holidays, vacationDays) {
   }
 }
 
-// ✅ Ensure script runs after everything is loaded
-window.addEventListener("DOMContentLoaded", async () => {
+// Initialize app
+async function initPlanner() {
   const input = document.getElementById("daysInput");
+  const select = document.getElementById("countrySelect");
   const year = new Date().getFullYear();
-  const defaultDays = parseInt(input.getAttribute("value")) || 20; // fallback
-  const holidays = await fetchHolidays(year);
-  renderCalendar(year, holidays, defaultDays);
-});
+  const countryCode = select.value;
+  const days = parseInt(input.getAttribute("value")) || 20;
 
-// Recalculate when button is clicked
+  const holidays = await fetchHolidays(countryCode, year);
+  renderCalendar(year, holidays, days);
+}
+
+// On page load
+window.addEventListener("DOMContentLoaded", initPlanner);
+
+// Recalculate when user clicks Plan
 document.getElementById("planBtn").addEventListener("click", async () => {
   const days = parseInt(document.getElementById("daysInput").value);
+  const countryCode = document.getElementById("countrySelect").value;
   const year = new Date().getFullYear();
-  const holidays = await fetchHolidays(year);
+
+  const holidays = await fetchHolidays(countryCode, year);
   renderCalendar(year, holidays, days);
 });
