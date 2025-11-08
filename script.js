@@ -1,10 +1,17 @@
+// Fetch holidays with names for a given country and year
 async function fetchHolidays(countryCode, year) {
   const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`;
   const response = await fetch(url);
   const data = await response.json();
-  return data.map(h => h.date); // returns array of YYYY-MM-DD strings
+  // Return an object mapping date -> holiday name
+  const holidayMap = {};
+  data.forEach(h => {
+    holidayMap[h.date] = h.localName || h.name;
+  });
+  return holidayMap;
 }
 
+// Render monthly calendars
 function renderCalendar(year, holidays, vacationDays) {
   const container = document.getElementById("calendarContainer");
   container.innerHTML = "";
@@ -36,9 +43,9 @@ function renderCalendar(year, holidays, vacationDays) {
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const startDay = (firstDay.getDay() + 6) % 7; // shift so Monday = 0
+    const startDay = (firstDay.getDay() + 6) % 7; // Monday = 0
 
-    // Empty cells before the first day
+    // Fill in blank spaces before the first day
     for (let i = 0; i < startDay; i++) {
       const empty = document.createElement("div");
       empty.classList.add("empty");
@@ -55,18 +62,10 @@ function renderCalendar(year, holidays, vacationDays) {
       const weekday = date.getDay();
       if (weekday === 0 || weekday === 6) dayEl.classList.add("weekend");
 
-      if (holidays.includes(isoDate)) {
+      // Mark holidays with tooltips
+      if (holidays[isoDate]) {
         dayEl.classList.add("holiday");
-      }
-
-      // Simple suggestion: mark 1 vacation day after each holiday
-      const nextDate = new Date(date);
-      nextDate.setDate(day + 1);
-      const nextIso = nextDate.toISOString().split("T")[0];
-      if (holidays.includes(isoDate) && vacationDays > 0 && weekday < 5) {
-        dayEl.classList.add("holiday");
-        const vacationEl = document.createElement("div");
-        vacationEl.classList.add("vacation");
+        dayEl.title = holidays[isoDate];
       }
 
       daysGrid.appendChild(dayEl);
@@ -75,6 +74,8 @@ function renderCalendar(year, holidays, vacationDays) {
     monthDiv.appendChild(daysGrid);
     container.appendChild(monthDiv);
   }
+
+  // Suggest simple vacation placement logic (optional future step)
 }
 
 async function initPlanner() {
