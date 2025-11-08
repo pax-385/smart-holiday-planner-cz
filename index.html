@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>Optimalizátor dovolené (ČR)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* --- Basic styling for readability --- */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 10px;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 6px;
+      margin: 6px 0;
+    }
+    .result {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 6px;
+    }
+    .highlight {
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <h1>Optimalizátor dovolené — ČR</h1>
+  <p>
+    Zadej počet pracovních dní dovolené a já navrhnu termíny, kdy máš nejdelší volno
+    (beru v úvahu víkendy a státní svátky v ČR).
+  </p>
+
+  <!-- --- Input section for user settings --- -->
+  <label>
+    Počet dní dovolené (prac. dní):
+    <input id="vacDays" type="number" min="1" value="5">
+  </label><br>
+
+  <label>
+    Rok k prohledání:
+    <input id="year" type="number" value="">
+  </label>
+
+  <div>
+    <button id="runBtn">Najít nejlepší termíny</button>
+    <span id="status"></span> <!-- Live status messages -->
+  </div>
+
+  <h2>Nejlepší návrhy</h2>
+  <div id="results"></div> <!-- Container for output results -->
+
+  <script>
+  /* ===============================================================
+     Helper functions for date handling
+     =============================================================== */
+
+  // Convert Date object → YYYY-MM-DD string
+  function toYMD(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // Add or subtract days from a Date
+  function addDays(d, days) {
+    const r = new Date(d);
+    r.setDate(r.getDate() + days);
+    r.setHours(0, 0, 0, 0);
+    return r;
+  }
+
+  // Return true if given day is Saturday or Sunday
+  function isWeekend(d) {
+    const wd = d.getDay(); // 0 = Sunday, 6 = Saturday
+    return wd === 0 || wd === 6;
+  }
+
+  /* ===============================================================
+     Fetch Czech public holidays from the Nager.Date API
+     Example API endpoint: https://date.nager.at/api/v3/PublicHolidays/{year}/CZ
+     =============================================================== */
+  async function fetchHolidaysForYears(years) {
+    const holidays = new Set();
+
+    for (const y of years) {
+      const url = `https://date.nager.at/api/v3/PublicHolidays/${y}/CZ`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const arr = await res.json(); // API returns an array of holiday objects
+        arr.forEach(h => holidays.add(h.date)); // Add each holiday date string (YYYY-MM-DD)
+      } catch (err) {
+        console.error('Error fetching holidays for', y, err);
+      }
+    }
+
+    return holidays; // Return a Set of strings
+  }
+
+  /* ===============================================================
+     Main vacation optimization logic
+     - Loops through possible start dates
+     - Simulates "spending" given number of working vacation days
+     - Calculates total consecutive days off (including weekends & holidays)
+     =============================================================== */
+  function findBestRanges(vacationDays, holidaysSet, searchStart, searchEnd, maxResults = 10) {
+    const results = [];
+
+    for (let d = new Date(searchStart); d <= searchEnd; d = addDays(d, 1)) {
+      const start = new Date(d);
+      let used = 0;
+      let current = new Date(start);
+
+      // Spend vacationDays worth of working days
+      while (used < vacationDays) {
+        const ymd = toYMD(current);
+        const weekend = isWeekend(current);
+        const isHoliday = holidaysSet.has(ymd);
+        if (!weekend && !isHoliday) {
+          used += 1;
+        }
+        current = addDays(current, 1);
+      }
+
+      // current now points to the day AFTER last day off
+      const lastOff = addDays(current, -1);
+      const totalDaysOff = Math.round((lastOff - start) / (1000 * 60 * 60 * 24)) + 1;
+
+      results.push({
+        start: toYMD(start),
+        end: toYMD(lastOff),
+        vacationUsed: vacationDays,
+        totalDaysOff
+      });
+    }
+
+    // Sort results by total days off (desc), then by start date
+    results.sort((a, b) => b.totalDaysOff - a.totalDaysOff || a.start.localeCompare(b.start));
+
+    // Keep only unique start dates and limit number of results
+    const unique = [];
+    const seenStarts = new Set();
+    for (const r of results) {
+      if (!seenStarts.has(r.start)) {
+        unique.push(r);
+        seenStarts.add(r.start);
+      }
+      if (unique.length >= maxResults) break;
+    }
+    return unique;
+  }
+
+  /* ===============================================================
+     User Interface logic
+     - Handles button click
+     - Fetches holidays
+     - Computes best vacation periods
+     - Displays results
+     =============================================================== */
+  document.getElementById('runBtn').addEventListener('click', async () => {
+    const vac = parseInt(document.getElementById('vacDays').value, 10);
+    const yearInput = document.getElementById('year').value.trim();
+
+    if (!vac || vac <= 0) {
+      alert('Zadej kladný počet dní dovolené.');
+      return;
+    }
+
+    const status = document.getElementById('status');
+    status.textContent = 'Stahuji svátky...';
+
+    // Determine which year(s) to analyze
+    const now = new Date();
+    const year = yearInput ? parseInt(yearInput, 10) : now.getFullYear();
+    const yearsToFetch = [year, year + 1]; // Include next year for overlaps
+
+    // Get public holidays
+    const holidaysSet = await fetchHolidaysForYears(yearsToFetch);
+
+    if (holidaysSet.size === 0) {
+      status.textContent = 'Warning: failed to fetch holidays (API). Continuing without holidays.';
+    } else {
+      status.textContent = `Loaded holidays for years: ${yearsToFetch.join(', ')} (${holidaysSet.size} total).`;
+    }
+
+    // Define search range (entire year + next)
+    const searchStart = new Date(year, 0, 1);
+    const searchEnd = new Date(year + 1, 11, 31);
+
+    // Run the main logic
+    status.textContent = 'Calculating best vacation terms...';
+    const suggestions = findBestRanges(vac, holidaysSet, searchStart, searchEnd, 20);
+
+    // Render results
+    const out = document.getElementById('results');
+    out.innerHTML = '';
+
+    if (suggestions.length === 0) {
+      out.textContent = 'No suggestions (check your input or network connection).';
+    } else {
+      suggestions.forEach(s => {
+        const el = document.createElement('div');
+        el.className = 'result';
+        el.innerHTML = `
+          <div>
+            <span class="highlight">${s.start}</span> → <span class="highlight">${s.end}</span>
+          </div>
+          <div>
+            Vacation days used: ${s.vacationUsed} • Total days off: ${s.totalDaysOff}
+          </div>`;
+        out.appendChild(el);
+      });
+    }
+
+    status.textContent = 'Done.';
+  });
+
+  // Prefill year input with current year
+  document.getElementById('year').value = new Date().getFullYear();
+  </script>
+</body>
+</html>
