@@ -1,4 +1,3 @@
-// Fetch public holidays for selected country and year
 async function fetchHolidays(countryCode, year) {
   const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`;
   const response = await fetch(url);
@@ -6,61 +5,78 @@ async function fetchHolidays(countryCode, year) {
   return data.map(h => h.date); // returns array of YYYY-MM-DD strings
 }
 
-// Generate a simple year calendar
 function renderCalendar(year, holidays, vacationDays) {
-  const calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
+  const container = document.getElementById("calendarContainer");
+  container.innerHTML = "";
 
-  const start = new Date(year, 0, 1);
-  const end = new Date(year, 11, 31);
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-  for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
-    const dayDiv = document.createElement("div");
-    dayDiv.classList.add("day");
+  for (let month = 0; month < 12; month++) {
+    const monthDiv = document.createElement("div");
+    monthDiv.classList.add("month");
 
-    const isoDate = date.toISOString().split("T")[0];
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const weekday = date.getDay();
+    const title = document.createElement("h2");
+    title.textContent = monthNames[month];
+    monthDiv.appendChild(title);
 
-    // Mark weekends
-    if (weekday === 0 || weekday === 6) {
-      dayDiv.classList.add("weekend");
+    const weekdaysRow = document.createElement("div");
+    weekdaysRow.classList.add("weekdays");
+    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(d => {
+      const dayEl = document.createElement("div");
+      dayEl.textContent = d;
+      weekdaysRow.appendChild(dayEl);
+    });
+    monthDiv.appendChild(weekdaysRow);
+
+    const daysGrid = document.createElement("div");
+    daysGrid.classList.add("days");
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDay = (firstDay.getDay() + 6) % 7; // shift so Monday = 0
+
+    // Empty cells before the first day
+    for (let i = 0; i < startDay; i++) {
+      const empty = document.createElement("div");
+      empty.classList.add("empty");
+      daysGrid.appendChild(empty);
     }
 
-    // Mark public holidays
-    if (holidays.includes(isoDate)) {
-      dayDiv.classList.add("holiday");
-      dayDiv.title = "Public holiday";
-    }
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const isoDate = date.toISOString().split("T")[0];
 
-    // Simple vacation marking example
-    if (vacationDays > 0 && holidays.includes(isoDate)) {
-      let tempDate = new Date(date);
-      let used = 0;
-      while (used < vacationDays) {
-        tempDate.setDate(tempDate.getDate() + 1);
-        if (
-          tempDate.getDay() !== 0 &&
-          tempDate.getDay() !== 6 &&
-          !holidays.includes(tempDate.toISOString().split("T")[0])
-        ) {
-          const vacationCell = document.querySelector(
-            `[data-date="${tempDate.toISOString().split("T")[0]}"]`
-          );
-          if (vacationCell) vacationCell.classList.add("vacation");
-          used++;
-        }
+      const dayEl = document.createElement("div");
+      dayEl.textContent = day;
+
+      const weekday = date.getDay();
+      if (weekday === 0 || weekday === 6) dayEl.classList.add("weekend");
+
+      if (holidays.includes(isoDate)) {
+        dayEl.classList.add("holiday");
       }
+
+      // Simple suggestion: mark 1 vacation day after each holiday
+      const nextDate = new Date(date);
+      nextDate.setDate(day + 1);
+      const nextIso = nextDate.toISOString().split("T")[0];
+      if (holidays.includes(isoDate) && vacationDays > 0 && weekday < 5) {
+        dayEl.classList.add("holiday");
+        const vacationEl = document.createElement("div");
+        vacationEl.classList.add("vacation");
+      }
+
+      daysGrid.appendChild(dayEl);
     }
 
-    dayDiv.textContent = `${day}.${month}`;
-    dayDiv.dataset.date = isoDate;
-    calendar.appendChild(dayDiv);
+    monthDiv.appendChild(daysGrid);
+    container.appendChild(monthDiv);
   }
 }
 
-// Initialize app
 async function initPlanner() {
   const input = document.getElementById("daysInput");
   const select = document.getElementById("countrySelect");
@@ -72,10 +88,8 @@ async function initPlanner() {
   renderCalendar(year, holidays, days);
 }
 
-// On page load
 window.addEventListener("DOMContentLoaded", initPlanner);
 
-// Recalculate when user clicks Plan
 document.getElementById("planBtn").addEventListener("click", async () => {
   const days = parseInt(document.getElementById("daysInput").value);
   const countryCode = document.getElementById("countrySelect").value;
