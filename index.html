@@ -3,18 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Czech Vacation Planner</title>
+  <title>Smart Holiday Planner</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>🇨🇿 Czech Vacation Planner</h1>
-  <p>Enter your available vacation days and discover the best way to extend your free time around public holidays.</p>
+  <h1>🌍 Smart Holiday Planner</h1>
+  <p>Plan your vacation around public holidays to maximize your free time.</p>
 
-  <!-- Input for number of vacation days -->
   <div class="controls">
-    <label for="daysInput">Number of vacation days:</label>
-    <!-- Default set to 20 -->
+    <!-- Country selector with flags -->
+    <label for="countrySelect">Select country:</label>
+    <select id="countrySelect">
+      <option value="CZ">🇨🇿 Czech Republic</option>
+      <option value="DE">🇩🇪 Germany</option>
+      <option value="FR">🇫🇷 France</option>
+      <option value="GB">🇬🇧 United Kingdom</option>
+      <option value="US">🇺🇸 United States</option>
+    </select>
+
+    <!-- Number of vacation days -->
+    <label for="daysInput">Vacation days:</label>
     <input type="number" id="daysInput" min="1" max="30" value="20" />
+
     <button id="planBtn">Plan Vacation</button>
   </div>
 
