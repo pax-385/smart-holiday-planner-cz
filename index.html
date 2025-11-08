@@ -9,14 +9,35 @@
 <body>
     <div class="container">
         <header>
-            <h1>🇨🇿 Czech Vacation Planner 2025</h1>
+            <h1>🇨🇿 Czech Vacation Planner</h1>
             <p>Optimize your vacation days by combining weekends and public holidays!</p>
         </header>
         
         <div class="controls">
             <div class="input-group">
+                <label for="year">Year:</label>
+                <div class="stepper">
+                    <button id="yearDown" class="stepper-btn">−</button>
+                    <input type="number" id="year" value="2025" min="2020" max="2030" readonly>
+                    <button id="yearUp" class="stepper-btn">+</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="countrySearch">Country:</label>
+                <input type="text" id="countrySearch" placeholder="Search country..." autocomplete="off">
+                <div id="countryDropdown" class="country-dropdown"></div>
+            </div>
+            <div class="input-group">
                 <label for="vacationDays">Vacation Days:</label>
                 <input type="number" id="vacationDays" value="20" min="1" max="50">
+            </div>
+            <div class="input-group">
+                <label for="strategy">Strategy:</label>
+                <select id="strategy">
+                    <option value="balanced">Balanced</option>
+                    <option value="long">One Long Break</option>
+                    <option value="short">Many Short Breaks</option>
+                </select>
             </div>
             <button id="calculateBtn">Calculate Best Dates</button>
         </div>
@@ -39,8 +60,12 @@
         <div id="stats" class="stats" style="display: none;"></div>
         
         <div id="calendars" class="calendars">
-            <div class="loading">Loading Czech holidays...</div>
+            <div class="loading">Loading holidays...</div>
         </div>
+        
+        <footer>
+            <p>Contact: <a href="mailto:tomas.hermansky@gmail.com">tomas.hermansky@gmail.com</a></p>
+        </footer>
     </div>
 
     <script src="script.js"></script>
